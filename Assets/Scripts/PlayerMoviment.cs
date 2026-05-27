@@ -10,7 +10,7 @@ public class MovimentoInfinito : MonoBehaviour
     [Header("Mecânica de Lados (Backspace)")]
     [SerializeField] private float posicaoXEsquerda = -1f;
     [SerializeField] private float posicaoXDireita = 1f;
-    private bool noLadoEsquerdo = true;
+    [SerializeField] private bool noLadoEsquerdo = false;
 
     [Header("Mecânica de Dash")]
     [SerializeField] private float forcaDash = 20f;
@@ -33,7 +33,7 @@ public class MovimentoInfinito : MonoBehaviour
     void Update()
     {
         // 1. Alternar de lado (Backspace)
-        if (Input.GetKeyDown(KeyCode.Backspace))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             noLadoEsquerdo = !noLadoEsquerdo;
             DefinirPosicaoHorizontal();
