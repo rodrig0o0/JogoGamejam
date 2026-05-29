@@ -8,6 +8,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/FaseDaArvore.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/FasedaUva.unity
+    guid: ed86ea6b6dd50fb4ba172cf3abbf16e9
+  - enabled: 1
+    path: Assets/Scenes/FaseDoChapeu.unity
+    guid: 419a1803df2c0a843b0aea2556ba8173
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

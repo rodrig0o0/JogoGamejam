@@ -1,13 +1,15 @@
 using UnityEngine;
-using TMPro; // Necessário para usar o TextMeshPro
+using TMPro;
 
 public class PontuacaoFaseUva : MonoBehaviour
 {
-    [SerializeField] private int pontos;
-    [SerializeField] private TextMeshProUGUI textoPontuacao; // Arraste seu texto do Canvas para cá no Inspetor
+    private int pontos;
+    [SerializeField] private TextMeshProUGUI textoPontuacao; 
 
     void Start()
     {
+        // Puxa os pontos acumulados da fase anterior. Se não achar nada, começa com 0.
+        pontos = PlayerPrefs.GetInt("PontosAcumulados", 0);
         AtualizarInterface();
     }
 
@@ -15,6 +17,7 @@ public class PontuacaoFaseUva : MonoBehaviour
     {
         pontos += addPontos;
         AtualizarInterface();
+        SalvarPontuacaoAtual(); // Salva sempre que ganhar pontos
         return pontos;
     }
 
@@ -22,15 +25,22 @@ public class PontuacaoFaseUva : MonoBehaviour
     {
         pontos -= redPontos;
         AtualizarInterface();
+        SalvarPontuacaoAtual(); // Salva sempre que perder pontos
         return pontos;
     }
 
-    // Método auxiliar para manter o texto sempre atualizado
     private void AtualizarInterface()
     {
         if (textoPontuacao != null)
         {
             textoPontuacao.text = "Pontos: " + pontos;
         }
+    }
+
+    // Salva o valor atualizado no PlayerPrefs para que a Fase 3 possa ler
+    private void SalvarPontuacaoAtual()
+    {
+        PlayerPrefs.SetInt("PontosAcumulados", pontos);
+        PlayerPrefs.Save();
     }
 }

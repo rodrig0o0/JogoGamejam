@@ -1,13 +1,19 @@
 using System.Collections;
 using UnityEngine;
+using TMPro; // ADICIONADO: Necessário para controlar o texto do Canvas
 
 public class MovimentoInfinito : MonoBehaviour
 {
-    [Header("Movimento Vertical")]
+    [Header("Movimento Vertical e Aceleração")]
     [SerializeField] private float velocidadeSubidaPadrao = 5f; 
+    [Tooltip("Quanto de velocidade o player ganha por segundo.")]
+    [SerializeField] private float taxaAceleracaoPorSegundo = 0.2f;
+    [Tooltip("Velocidade máxima que o player pode atingir.")]
+    [SerializeField] private float velocidadeMaxima = 25f;
+    
     private float velocidadeAtual;
 
-    [Header("Mecânica de Lados (Backspace)")]
+    [Header("Mecânica de Lados (Espaço)")]
     [SerializeField] private float posicaoXEsquerda = -1f;
     [SerializeField] private float posicaoXDireita = 1f;
     [SerializeField] private bool noLadoEsquerdo = false;
@@ -21,42 +27,52 @@ public class MovimentoInfinito : MonoBehaviour
     private bool estaTomandoDash = false;
     private Rigidbody2D rb;
 
+    [Header("UI do Dash (Canvas)")]
+    [SerializeField] private TextMeshProUGUI textoCooldownDash; // Arraste o texto do Dash aqui
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0f; // Desativa a gravidade
+        rb.gravityScale = 0f; 
         
         velocidadeAtual = velocidadeSubidaPadrao;
-        DefinirPosicaoHorizontal();
+        DefirnirPosicaoHorizontal();
     }
 
     void Update()
     {
-        // 1. Alternar de lado (Backspace)
+        // 1. Alternar de lado (Espaço)
         if (Input.GetKeyDown(KeyCode.Space))
         {
             noLadoEsquerdo = !noLadoEsquerdo;
-            DefinirPosicaoHorizontal();
+            DefirnirPosicaoHorizontal();
         }
 
         if (estaTomandoDash) return;
+
+        // Aceleração Constante
+        if (velocidadeAtual < velocidadeMaxima)
+        {
+            velocidadeAtual += taxaAceleracaoPorSegundo * Time.deltaTime;
+        }
 
         // 2. Ativar o Dash (Botão Esquerdo do Mouse)
         if (Input.GetMouseButtonDown(0) && Time.time >= tempoProximoDash)
         {
             StartCoroutine(ExecutarDash());
         }
+
+        // ADICIONADO: Atualiza o texto do Cooldown na tela
+        AtualizarTextoCooldown();
     }
 
     void FixedUpdate()
     {
         if (estaTomandoDash) return;
-
-        // Aplica a velocidade atualizada (seja a normal ou a de lentidão)
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, velocidadeAtual);
     }
 
-    void DefinirPosicaoHorizontal()
+    void DefirnirPosicaoHorizontal()
     {
         float novoX = noLadoEsquerdo ? posicaoXEsquerda : posicaoXDireita;
         transform.position = new Vector3(novoX, transform.position.y, transform.position.z);
@@ -73,23 +89,32 @@ public class MovimentoInfinito : MonoBehaviour
         estaTomandoDash = false;
     }
 
-    // FUNÇÃO PÚBLICA: O Galho vai chamar essa função aqui embaixo!
-    public void AplicarPenalidadeGalho(float novaVelocidade, float duracao, float forcaRecuo)
+    // ADICIONADO: Método para calcular o tempo do Dash e exibir de forma bonita
+    void AtualizarTextoCooldown()
     {
-        // Para o Dash imediatamente se o jogador bater num galho
-        estaTomandoDash = false; 
+        if (textoCooldownDash == null) return;
 
-        // Aplica o recuo para trás usando a física do Rigidbody (evita bugs de colisão)
-        rb.position = new Vector2(rb.position.x, rb.position.y - forcaRecuo);
+        // Calcula quanto tempo falta para o próximo dash
+        float tempoRestante = tempoProximoDash - Time.time;
 
-        // Inicia a rotina de lentidão interna do jogador
-        StartCoroutine(RotinaLentidao(novaVelocidade, duracao));
+        if (tempoRestante > 0)
+        {
+            // Se ainda estiver no cooldown, mostra o tempo com 1 casa decimal (Ex: "Dash: 3.4s")
+            textoCooldownDash.text = $"Dash: {tempoRestante:F1}s";
+            textoCooldownDash.color = Color.yellow; // Opcional: fica amarelo no cooldown
+        }
+        else
+        {
+            // Se já puder usar, avisa o jogador
+            textoCooldownDash.text = "Dash: PRONTO!";
+            textoCooldownDash.color = Color.green; // Opcional: fica verde quando pronto
+        }
     }
 
-    IEnumerator RotinaLentidao(float novaVelocidade, float duracao)
+    public void AplicarPenalidadeGalho(float velocidadeImpacto, float duracaoNaoUtilizada, float forcaRecuo)
     {
-        velocidadeAtual = novaVelocidade; // Fica lento
-        yield return new WaitForSeconds(duracao); // Espera o tempo
-        velocidadeAtual = velocidadeSubidaPadrao; // Volta ao normal
+        estaTomandoDash = false; 
+        rb.position = new Vector2(rb.position.x, rb.position.y - forcaRecuo);
+        velocidadeAtual = velocidadeSubidaPadrao; 
     }
 }

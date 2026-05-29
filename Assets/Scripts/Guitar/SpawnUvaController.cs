@@ -10,6 +10,7 @@ public class SpawnUvaController : MonoBehaviour
 
     [Header("Configurações do Prefab")]
     public GameObject prefab;
+    public float scale = 1f;
 
     [Header("Configurações de Tempo")]
     [SerializeField] private float tempoTotalDoJogo = 30f;
@@ -67,6 +68,7 @@ public class SpawnUvaController : MonoBehaviour
         if (pontoEscolhido != null)
         {
             GameObject novaNota = Instantiate(prefab, pontoEscolhido.position, Quaternion.identity);
+            novaNota.transform.localScale = new Vector3(scale,scale,scale);
             novaNota.tag = "NotaUva"; // Garante a tag configurada via código
         }
     }
